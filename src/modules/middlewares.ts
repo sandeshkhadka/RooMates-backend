@@ -6,6 +6,31 @@ function rejectRequest(res: Response, status: number, message: string) {
   res.json({ message });
 }
 
+export function contributionMiddleware(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) {
+  const errors = validationResult(req);
+
+  if (!errors.isEmpty()) {
+    return rejectRequest(res, 400, "Insufficient data sent");
+  }
+  next();
+}
+export function createTaskMiddleware(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) {
+  const errors = validationResult(req);
+
+  if (!errors.isEmpty()) {
+    return rejectRequest(res, 400, "Insufficient data sent");
+  }
+  next();
+}
+
 export function signInMiddleware(
   req: Request,
   res: Response,
@@ -57,7 +82,7 @@ export function authMiddleware(
   }
   try {
     const user = verifyJwt(token);
-    Object.defineProperty(req, "user", user);
+    req.user = user;
     next();
   } catch (e) {
     console.log(e);

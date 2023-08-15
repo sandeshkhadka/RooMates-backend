@@ -1,7 +1,7 @@
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 import CustomError from "./errors";
-interface User {
+export interface User {
   username: string;
   id: string;
 }
@@ -17,7 +17,7 @@ export function createJwt(user: User) {
 export function verifyJwt(token: string) {
   const jwtSecret = process.env.JWT_SECRET;
   if (jwtSecret) {
-    return jwt.verify(token, jwtSecret);
+    return jwt.verify(token, jwtSecret) as User;
   } else {
     throw new CustomError("jwt secret not found", "server");
   }

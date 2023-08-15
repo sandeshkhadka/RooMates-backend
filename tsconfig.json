@@ -1,4 +1,11 @@
 {
+    "ts-node": {
+    "files": true
+  },
+  "files": [
+    "src/index.ts",
+    "src/types/index.d.ts"
+  ],
   "compilerOptions": {
     "sourceMap": true,
     "outDir": "dist",
@@ -7,4 +14,3 @@
     "esModuleInterop": true
   }
 }
-
