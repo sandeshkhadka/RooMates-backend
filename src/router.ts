@@ -6,11 +6,14 @@ import {
   createTaskMiddleware,
 } from "./modules/middlewares";
 import {
+  approveContribution,
   createContribution,
+  deleteContribuion,
   getContributionById,
   getContributions,
   updateContibutions,
 } from "./handlers/contribution";
+import { getAllUsers } from "./handlers/signin_signup";
 const ContributionTypes = [
   "vegetables",
   "water",
@@ -25,7 +28,7 @@ const router = Router();
 router.get("/task", getTasks);
 router.get("/contribution", getContributions);
 
-// router.get("/user/:id");
+router.get("/users", getAllUsers);
 router.get("/task/:id", getTaskById);
 router.get("/contribution/:id", getContributionById);
 
@@ -43,7 +46,7 @@ router.post(
   contributionMiddleware,
   createContribution,
 );
-
+router.post("/contribution/approve/:id", approveContribution);
 router.put(
   "/task/:id",
   body("name").notEmpty(),
@@ -59,5 +62,5 @@ router.put(
   contributionMiddleware,
   updateContibutions,
 );
-
+router.delete("/contribution/:id", deleteContribuion);
 export default router;

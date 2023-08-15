@@ -1,8 +1,86 @@
 import { Request, Response } from "express";
 import prisma from "../db";
 
+export async function approveContribution(req: Request, res: Response) {
+  const username: string = req.user!.username;
+  const contributionId: string = req.params.id;
+
+  const contribution = await prisma.contribution.findUnique({
+    where: {
+      id: contributionId,
+    },
+  });
+  if (!contribution) {
+    res.status(400);
+    return res.json({ message: "No such contribution found" });
+  }
+  const approvedBy = contribution.approvedBy;
+  if (approvedBy.includes(username)) {
+    res.status(200);
+    return res.json({ message: "already approved" });
+  }
+  const totalUsers = await prisma.user.findMany();
+  const allUsernames = totalUsers.map((user) => user.username);
+  approvedBy.push(username);
+  let passed = true;
+  allUsernames.forEach((username) => {
+    if (!approvedBy.includes(username)) {
+      passed = false;
+    }
+  });
+
+  const updatedContribution = await prisma.contribution.update({
+    where: {
+      id: contributionId,
+    },
+    data: {
+      approvedBy: approvedBy,
+      passed: passed,
+    },
+  });
+
+  res.status(200);
+  res.json({ updatedContribution });
+}
+export async function deleteContribuion(req: Request, res: Response) {
+  const contributionId = req.params.id;
+  const userId = req.user!.id;
+
+  const contribution = await prisma.contribution.findUnique({
+    where: {
+      id: contributionId,
+    },
+  });
+
+  if (!contribution) {
+    res.status(400);
+    return res.json({ message: "no such contribution" });
+  }
+
+  if (contribution.belongsToId !== userId) {
+    res.status(401);
+    return res.json({ message: "not authorized to do that" });
+  }
+
+  const deleted = await prisma.contribution.delete({
+    where: {
+      id: contributionId,
+    },
+  });
+
+  res.status(200);
+  res.json({ deleted });
+}
 export async function getContributions(req: Request, res: Response) {
-  const contributions = await prisma.contribution.findMany();
+  const contributions = await prisma.contribution.findMany({
+    include: {
+      belongsTo: {
+        select: {
+          username: true,
+        },
+      },
+    },
+  });
 
   res.status(200);
   res.json({ contributions });
