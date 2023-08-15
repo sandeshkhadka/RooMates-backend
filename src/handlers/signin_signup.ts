@@ -2,6 +2,14 @@ import { Request, Response } from "express";
 import { comparePassword, createJwt, hashPassword } from "../modules/auth";
 import prisma from "../db";
 
+export async function getAllUsers(req: Request, res: Response) {
+  const users = await prisma.user.findMany();
+  const fiteredUsers = users.map((user) => {
+    return { username: user.username, id: user.id };
+  });
+  res.status(200);
+  res.json({ users: fiteredUsers });
+}
 export async function signin(req: Request, res: Response) {
   const username: string = req.body.username;
   const password: string = req.body.password;
