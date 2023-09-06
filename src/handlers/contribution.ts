@@ -72,15 +72,7 @@ export async function deleteContribuion(req: Request, res: Response) {
   res.json({ deleted });
 }
 export async function getContributions(req: Request, res: Response) {
-  const contributions = await prisma.contribution.findMany({
-    include: {
-      belongsTo: {
-        select: {
-          username: true,
-        },
-      },
-    },
-  });
+  const contributions = await prisma.contribution.findMany();
 
   res.status(200);
   res.json({ contributions });

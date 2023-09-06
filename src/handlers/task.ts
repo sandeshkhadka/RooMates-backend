@@ -21,9 +21,6 @@ export async function getTasks(req: Request, res: Response) {
     where: {
       status: "Pending",
     },
-    include: {
-      belongsTo: true,
-    },
   });
 
   res.status(200);
