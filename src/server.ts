@@ -2,7 +2,7 @@ import express from "express";
 import router from "./router";
 import cors from "cors";
 import {
-  // authMiddleware,
+  authMiddleware,
   signInMiddleware,
   signUpMiddleware,
 } from "./modules/middlewares";
@@ -29,6 +29,6 @@ app.post(
   signin,
 );
 
-// app.use("/api", authMiddleware, router);
-app.use("/api", router);
+app.use("/api", authMiddleware, router);
+// app.use("/api", router);
 export default app;

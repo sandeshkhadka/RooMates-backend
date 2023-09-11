@@ -13,7 +13,7 @@ import {
   getContributions,
   updateContibutions,
 } from "./handlers/contribution";
-import { getAllUsers } from "./handlers/signin_signup";
+import { getAllUsers, rehydrate } from "./handlers/users";
 const ContributionTypes = [
   "vegetables",
   "water",
@@ -29,6 +29,7 @@ router.get("/task", getTasks);
 router.get("/contribution", getContributions);
 
 router.get("/users", getAllUsers);
+router.get("/rehydrate", rehydrate);
 router.get("/task/:id", getTaskById);
 router.get("/contribution/:id", getContributionById);
 
