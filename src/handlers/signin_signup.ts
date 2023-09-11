@@ -2,26 +2,11 @@ import { Request, Response } from "express";
 import { comparePassword, createJwt, hashPassword } from "../modules/auth";
 import prisma from "../db";
 
-export async function getAllUsers(req: Request, res: Response) {
-  const users = await prisma.user.findMany({
-    include: {
-      routineTasks: {
-        where: {
-          status: "Pending",
-        },
-      },
-    },
-  });
-  const fiteredUsers = users.map((user) => {
-    return { username: user.username, id: user.id, tasks: user.routineTasks };
-  });
-  res.status(200);
-  res.json({ users: fiteredUsers });
-}
 export async function signin(req: Request, res: Response) {
+
   const username: string = req.body.username;
   const password: string = req.body.password;
-
+  console.log(username, password);
   const user = await prisma.user.findUnique({
     where: {
       username: username,
@@ -46,7 +31,13 @@ export async function signin(req: Request, res: Response) {
     id: user.id,
   });
   res.status(200);
-  res.json({ token });
+  res.json({
+    token,
+    user: {
+      username: user.username,
+      id: user.id,
+    },
+  });
 }
 
 export async function signup(req: Request, res: Response) {

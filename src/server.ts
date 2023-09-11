@@ -1,7 +1,8 @@
 import express from "express";
 import router from "./router";
+import cors from "cors";
 import {
-  authMiddleware,
+  // authMiddleware,
   signInMiddleware,
   signUpMiddleware,
 } from "./modules/middlewares";
@@ -10,7 +11,7 @@ import { body } from "express-validator";
 import morgan from "morgan";
 
 const app = express();
-
+app.use(cors());
 app.use(morgan("dev"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -28,5 +29,6 @@ app.post(
   signin,
 );
 
-app.use("/api", authMiddleware, router);
+// app.use("/api", authMiddleware, router);
+app.use("/api", router);
 export default app;

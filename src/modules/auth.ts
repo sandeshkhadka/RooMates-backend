@@ -1,10 +1,10 @@
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 import CustomError from "./errors";
-export interface User {
+export type User = {
   username: string;
   id: string;
-}
+};
 export function createJwt(user: User) {
   const jwtSecret = process.env.JWT_SECRET;
   if (jwtSecret) {
