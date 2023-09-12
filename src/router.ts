@@ -1,6 +1,12 @@
 import { Router } from "express";
 import { body } from "express-validator";
-import { createTask, getTaskById, getTasks, updateTask } from "./handlers/task";
+import {
+  createTask,
+  deleteTask,
+  getTaskById,
+  getTasks,
+  updateTask,
+} from "./handlers/task";
 import {
   contributionMiddleware,
   createTaskMiddleware,
@@ -36,6 +42,7 @@ router.get("/contribution/:id", getContributionById);
 router.post(
   "/task",
   body("name").exists().notEmpty(),
+  body("assignToId").exists().notEmpty(),
   createTaskMiddleware,
   createTask,
 );
@@ -64,4 +71,5 @@ router.put(
   updateContibutions,
 );
 router.delete("/contribution/:id", deleteContribuion);
+router.delete("/task/:id", deleteTask);
 export default router;
