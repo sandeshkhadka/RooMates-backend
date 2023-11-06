@@ -1,6 +1,8 @@
 import { NextFunction, Request, Response } from "express";
 import { verifyJwt } from "./auth";
 import { validationResult } from "express-validator";
+import { Socket } from "socket.io";
+import { ExtendedError } from "socket.io/dist/namespace";
 function rejectRequest(res: Response, status: number, message: string) {
   res.status(status);
   res.json({ message });
@@ -87,5 +89,27 @@ export function authMiddleware(
   } catch (e) {
     console.log(e);
     rejectRequest(res, 401, "Invalid jwt");
+  }
+}
+export function socketAuth(
+  socket: Socket,
+  next: (err?: ExtendedError) => void,
+) {
+  const bearer = socket.handshake.auth.token;
+  if (!bearer) {
+    return next(new Error("Not authorized"));
+  }
+  const [, token] = bearer.split(" ");
+
+  if (!token) {
+    return next(new Error("Not authorized"));
+  }
+  try {
+    const user = verifyJwt(token);
+    socket.user = user;
+    next();
+  } catch (e) {
+    console.log(e);
+    next(new Error("Invalid jwt"));
   }
 }
