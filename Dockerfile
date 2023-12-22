@@ -1,0 +1,13 @@
+FROM node:20-alpine
+WORKDIR /app
+COPY package*.json .
+RUN npm install
+COPY . .
+EXPOSE 3001
+EXPOSE 3000
+ENV PORT $PORT
+ENV SOCKET_PORT $SOCKET_PORT
+ENV DATABASE_URL $DATABASE_URL
+ENV JWT_SECRET $JWT_SECRET
+RUN npx prisma generate
+CMD ["npm", "run","dev"]
