@@ -5,9 +5,10 @@ RUN npm install
 COPY . .
 EXPOSE 3001
 EXPOSE 3000
+RUN npx prisma generate
+RUN chmod +x ./startserver.sh
 ENV PORT $PORT
 ENV SOCKET_PORT $SOCKET_PORT
 ENV DATABASE_URL $DATABASE_URL
 ENV JWT_SECRET $JWT_SECRET
-RUN npx prisma generate
 CMD ["npm", "run","dev"]
