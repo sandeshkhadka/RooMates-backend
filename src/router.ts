@@ -20,6 +20,7 @@ import {
   updateContibutions,
 } from "./handlers/contribution";
 import { getAllUsers, rehydrate } from "./handlers/users";
+import { getContributionDistribution, getPendingTasks } from "./handlers/dashboard";
 const ContributionTypes = [
   "vegetables",
   "water",
@@ -37,7 +38,9 @@ router.get("/contribution", getContributions);
 router.get("/users", getAllUsers);
 router.get("/rehydrate", rehydrate);
 router.get("/task/:id", getTaskById);
-router.get("/contribution/:id", getContributionById);
+router.get("/contribution/id/:id", getContributionById);
+router.get("/dashboard/contribution/distribution", getContributionDistribution);
+router.get("/dashboard/task/pending", getPendingTasks);
 
 router.post(
   "/task",

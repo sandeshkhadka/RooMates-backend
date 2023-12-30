@@ -72,11 +72,16 @@ export async function deleteContribuion(req: Request, res: Response) {
   res.json({ deleted });
 }
 export async function getContributions(req: Request, res: Response) {
-  const contributions = await prisma.contribution.findMany();
+  const contributions = await prisma.contribution.findMany({
+    orderBy: {
+      createdAt: "desc",
+    },
+  });
 
   res.status(200);
   res.json({ contributions });
 }
+
 export async function getContributionById(req: Request, res: Response) {
   const id = req.params.id;
   const contribution = await prisma.contribution.findUnique({

@@ -45,6 +45,13 @@ model Contribution {
   passed Boolean @default(false)
 }
 
+model ChatMessages{
+  id String @id @unique @default(uuid())
+  message String
+  sender String
+  timestamp DateTime @default(now())
+}
+
 
 
 
