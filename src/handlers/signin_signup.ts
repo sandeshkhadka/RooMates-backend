@@ -1,53 +1,55 @@
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import { comparePassword, createJwt, hashPassword } from "../modules/auth";
+import CustomError from "../modules/errors";
 import prisma from "../db";
 
-export async function signin(req: Request, res: Response) {
-
+export async function signin(req: Request, res: Response, next: NextFunction) {
   const username: string = req.body.username;
   const password: string = req.body.password;
-  console.log(username, password);
-  const user = await prisma.user.findUnique({
-    where: {
-      username: username,
-    },
-  });
-  if (user === null) {
-    res.status(401);
-    return res.json({
-      message: "Incorrect username or password",
+  // console.log(username, password);
+  try {
+    const user = await prisma.user.findUnique({
+      where: {
+        username: username,
+      },
     });
-  }
-  const hashedPassword = user.password;
-  const authPassed = await comparePassword(password, hashedPassword);
-  if (!authPassed) {
-    res.status(401);
-    return res.json({
-      message: "Incorrect username or password",
-    });
-  }
-  const token = createJwt({
-    username: user.username,
-    id: user.id,
-  });
-  res.status(200);
-  res.json({
-    token,
-    user: {
+    if (user === null) {
+      throw new CustomError("Incorrect username or password", 401);
+    }
+    const hashedPassword = user.password;
+    const authPassed = await comparePassword(password, hashedPassword);
+    if (!authPassed) {
+      throw new CustomError("Incorrect username or password", 401);
+    }
+    const token = createJwt({
       username: user.username,
       id: user.id,
-    },
-  });
+    });
+    res.status(200);
+    res.json({
+      token,
+      user: {
+        username: user.username,
+        id: user.id,
+      },
+    });
+  } catch (err) {
+    if (err instanceof CustomError) {
+      next(err);
+    } else {
+      next(new CustomError("Could not login", 500));
+    }
+  }
 }
 
-export async function signup(req: Request, res: Response) {
+export async function signup(req: Request, res: Response, next: NextFunction) {
   const username: string = req.body.username;
   const password: string = req.body.password;
   const email: string = req.body.email;
 
-  const hashedPassword = await hashPassword(password);
-
   try {
+    const hashedPassword = await hashPassword(password);
+
     const user = await prisma.user.create({
       data: {
         username: username,
@@ -68,11 +70,11 @@ export async function signup(req: Request, res: Response) {
       id: user.id,
       token: token,
     });
-  } catch (e) {
-    console.log(e);
-    res.status(400);
-    res.json({
-      message: "username not available",
-    });
+  } catch (err) {
+    if (err instanceof CustomError) {
+      next(err);
+    } else {
+      next(new CustomError("Could not signup", 500));
+    }
   }
 }

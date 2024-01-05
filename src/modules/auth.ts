@@ -1,6 +1,5 @@
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
-import CustomError from "./errors";
 export type User = {
   username: string;
   id: string;
@@ -11,7 +10,8 @@ export function createJwt(user: User) {
     const token = jwt.sign(user, jwtSecret);
     return token;
   } else {
-    throw new CustomError("jwt secret not found", "server");
+    console.log("JWT secret not found");
+    throw new Error();
   }
 }
 export function verifyJwt(token: string) {
@@ -19,7 +19,8 @@ export function verifyJwt(token: string) {
   if (jwtSecret) {
     return jwt.verify(token, jwtSecret) as User;
   } else {
-    throw new CustomError("jwt secret not found", "server");
+    console.log("JWT secret not found");
+    throw new Error();
   }
 }
 

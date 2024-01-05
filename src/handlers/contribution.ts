@@ -1,150 +1,208 @@
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import prisma from "../db";
+import CustomError from "../modules/errors";
 
-export async function approveContribution(req: Request, res: Response) {
+export async function approveContribution(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) {
   const username: string = req.user!.username;
   const contributionId: string = req.params.id;
 
-  const contribution = await prisma.contribution.findUnique({
-    where: {
-      id: contributionId,
-    },
-  });
-  if (!contribution) {
-    res.status(400);
-    return res.json({ message: "No such contribution found" });
-  }
-  const approvedBy = contribution.approvedBy;
-  if (approvedBy.includes(username)) {
-    res.status(200);
-    return res.json({ message: "already approved" });
-  }
-  const totalUsers = await prisma.user.findMany();
-  const allUsernames = totalUsers.map((user) => user.username);
-  approvedBy.push(username);
-  let passed = true;
-  allUsernames.forEach((username) => {
-    if (!approvedBy.includes(username)) {
-      passed = false;
+  try {
+    const contribution = await prisma.contribution.findUnique({
+      where: {
+        id: contributionId,
+      },
+    });
+    if (!contribution) {
+      throw new CustomError("Contribution not found", 404);
     }
-  });
+    const approvedBy = contribution.approvedBy;
+    if (approvedBy.includes(username)) {
+      res.status(200);
+      return res.json({ message: "already approved" });
+    }
+    const totalUsers = await prisma.user.findMany({
+      select: {
+        username: true,
+      },
+    });
+    const allUsernames = totalUsers.map((user) => user.username);
 
-  const updatedContribution = await prisma.contribution.update({
-    where: {
-      id: contributionId,
-    },
-    data: {
-      approvedBy: approvedBy,
-      passed: passed,
-    },
-  });
+    approvedBy.push(username);
+    let passed = true;
+    allUsernames.forEach((username) => {
+      if (!approvedBy.includes(username)) {
+        passed = false;
+      }
+    });
 
-  res.status(200);
-  res.json({ updatedContribution });
+    const updatedContribution = await prisma.contribution.update({
+      where: {
+        id: contributionId,
+      },
+      data: {
+        approvedBy: approvedBy,
+        passed: passed,
+      },
+    });
+
+    res.status(200);
+    res.json({ updatedContribution });
+  } catch (err) {
+    if (err instanceof CustomError) {
+      next(err);
+    } else {
+      next(new CustomError("Could not update contribution", 500));
+    }
+  }
 }
-export async function deleteContribuion(req: Request, res: Response) {
+export async function deleteContribuion(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) {
   const contributionId = req.params.id;
   const userId = req.user!.id;
 
-  const contribution = await prisma.contribution.findUnique({
-    where: {
-      id: contributionId,
-    },
-  });
+  try {
+    const deleted = await prisma.contribution.delete({
+      where: {
+        id: contributionId,
+        belongsToId: userId,
+      },
+    });
 
-  if (!contribution) {
-    res.status(400);
-    return res.json({ message: "no such contribution" });
+    res.status(200);
+    res.json({ deleted });
+  } catch (err) {
+    if (err instanceof CustomError) {
+      next(err);
+    } else {
+      next(new CustomError("Could not delete contribution", 500));
+    }
   }
+}
+export async function getContributions(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) {
+  try {
+    const contributions = await prisma.contribution.findMany({
+      orderBy: {
+        createdAt: "desc",
+      },
+    });
 
-  if (contribution.belongsToId !== userId) {
-    res.status(401);
-    return res.json({ message: "not authorized to do that" });
+    res.status(200);
+    res.json({ contributions });
+  } catch (err) {
+    next(new CustomError("Could not get contributions", 500));
   }
-
-  const deleted = await prisma.contribution.delete({
-    where: {
-      id: contributionId,
-    },
-  });
-
-  res.status(200);
-  res.json({ deleted });
-}
-export async function getContributions(req: Request, res: Response) {
-  const contributions = await prisma.contribution.findMany({
-    orderBy: {
-      createdAt: "desc",
-    },
-  });
-
-  res.status(200);
-  res.json({ contributions });
 }
 
-export async function getContributionById(req: Request, res: Response) {
+export async function getContributionById(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) {
   const id = req.params.id;
-  const contribution = await prisma.contribution.findUnique({
-    where: {
-      id: id,
-    },
-  });
-
-  res.status(200);
-  res.json({ contribution });
+  try {
+    const contribution = await prisma.contribution.findUnique({
+      where: {
+        id: id,
+      },
+    });
+    if (!contribution) {
+      throw new CustomError("Contribution not found", 404);
+    }
+    res.status(200);
+    res.json({ contribution });
+  } catch (err) {
+    if (err instanceof CustomError) {
+      next(err);
+    } else {
+      next(new CustomError(`Could not get contribution with id :${id}`, 500));
+    }
+  }
 }
 
-export async function updateContibutions(req: Request, res: Response) {
+export async function updateContibutions(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) {
   const name: string = req.body.name;
   const amount: number = req.body.amount;
   const type: string = req.body.type;
   const contibutionId = req.params.id;
   const userId = req.user!.id;
-  const contribution = await prisma.contribution.findUnique({
-    where: {
-      id: contibutionId,
-    },
-  });
+  const username = req.user!.username;
+  try {
+    const contribution = await prisma.contribution.findUnique({
+      where: {
+        id: contibutionId,
+      },
+    });
 
-  if (!contribution) {
-    res.status(400);
-    return res.json({ message: "No such contribution found" });
-  }
-  if (userId !== contribution.belongsToId) {
-    res.status(400);
-    return res.json({ message: "You don't own this contribution" });
-  }
-  const updatedContribution = await prisma.contribution.update({
-    where: {
-      id: contribution.id,
-    },
-    data: {
-      name: name,
-      amount: amount,
-      type: type,
-    },
-  });
+    if (!contribution) {
+      throw new CustomError("Contribution not found", 404);
+    }
+    if (userId !== contribution.belongsToId) {
+      throw new CustomError(
+        `Contribution does not belongs to ${username}`,
+        401,
+      );
+    }
+    const updatedContribution = await prisma.contribution.update({
+      where: {
+        id: contribution.id,
+      },
+      data: {
+        name: name,
+        amount: amount,
+        type: type,
+      },
+    });
 
-  res.status(200);
-  res.json({ updatedContribution });
+    res.status(200);
+    res.json({ updatedContribution });
+  } catch (err) {
+    if (err instanceof CustomError) {
+      next(err);
+    } else {
+      next(new CustomError("Could not update contribution", 500));
+    }
+  }
 }
 
-export async function createContribution(req: Request, res: Response) {
+export async function createContribution(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) {
   const name: string = req.body.name;
   const type: string = req.body.type;
   const belongsToId: string = req.user!.id;
   const amount: number = req.body.amount;
   const username: string = req.user!.username;
-  const contribution = await prisma.contribution.create({
-    data: {
-      name: name,
-      type: type,
-      belongsToId: belongsToId,
-      amount: amount,
-      approvedBy: [username],
-    },
-  });
+  try {
+    const contribution = await prisma.contribution.create({
+      data: {
+        name: name,
+        type: type,
+        belongsToId: belongsToId,
+        amount: amount,
+        approvedBy: [username],
+      },
+    });
 
-  res.status(200);
-  res.json({ contribution });
+    res.status(200);
+    res.json({ contribution });
+  } catch (err) {
+    next(new CustomError("Could not create Contribuion", 500));
+  }
 }

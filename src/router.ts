@@ -20,7 +20,11 @@ import {
   updateContibutions,
 } from "./handlers/contribution";
 import { getAllUsers, rehydrate } from "./handlers/users";
-import { getContributionDistribution, getPendingTasks } from "./handlers/dashboard";
+import {
+  getContributionDistribution,
+  getPendingTasks,
+} from "./handlers/dashboard";
+import { errHandler } from "./modules/errors";
 const ContributionTypes = [
   "vegetables",
   "water",
@@ -31,7 +35,7 @@ const ContributionTypes = [
   "others",
 ];
 const router = Router();
-
+router.use(errHandler);
 router.get("/task", getTasks);
 router.get("/contribution", getContributions);
 
