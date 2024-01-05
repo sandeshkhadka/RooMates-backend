@@ -1,21 +1,25 @@
 import { NextFunction, Request, Response } from "express";
 
-type ErrorType = "server" | "client" | "auth";
 class CustomError extends Error {
-  type: ErrorType;
-  constructor(message: string, type: ErrorType) {
+  errorCode: number;
+  constructor(message: string, type: number) {
     super(message);
-    this.type = type;
+    this.errorCode = type;
+    Object.setPrototypeOf(this, CustomError.prototype);
   }
 }
 export function errHandler(
-  err: Error | CustomError,
+  err: CustomError,
   req: Request,
   res: Response,
   next: NextFunction,
 ) {
-  console.log(err, req);
+  console.log(err);
   console.log("--------------------------------------------\n\n");
-  next();
+  if (err.errorCode) {
+    res.status(err.errorCode).send({ message: err.message });
+  } else {
+    res.status(500).send({ message: "Something went wrong" });
+  }
 }
 export default CustomError;
