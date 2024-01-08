@@ -4,9 +4,10 @@ import cors from "cors";
 import {
   authMiddleware,
   signInMiddleware,
+  requestSignUpMiddleware,
   signUpMiddleware,
 } from "./modules/middlewares";
-import { signin, signup } from "./handlers/signin_signup";
+import { signin, signup, requestSignup } from "./handlers/signin_signup";
 import { body } from "express-validator";
 import morgan from "morgan";
 
@@ -18,9 +19,15 @@ app.use(express.urlencoded({ extended: true }));
 
 app.post(
   "/signup",
-  body(["username", "password", "email"]).exists(),
+  body(["password", "token"]).exists(),
   signUpMiddleware,
   signup,
+);
+app.post(
+  "/request_signup",
+  body(["username", "email"]).exists(),
+  requestSignUpMiddleware,
+  requestSignup,
 );
 app.post(
   "/signin",

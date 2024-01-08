@@ -59,11 +59,20 @@ export function signUpMiddleware(
   const errors = validationResult(req);
 
   if (!errors.isEmpty()) {
-    return rejectRequest(
-      res,
-      400,
-      "username,password and email fields cannot be empty",
-    );
+    return rejectRequest(res, 400, "password and token fields cannot be empty");
+  }
+
+  next();
+}
+export function requestSignUpMiddleware(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) {
+  const errors = validationResult(req);
+
+  if (!errors.isEmpty()) {
+    return rejectRequest(res, 400, "username and email fields cannot be empty");
   }
 
   next();

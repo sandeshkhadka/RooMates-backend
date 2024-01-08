@@ -4,6 +4,10 @@ export type User = {
   username: string;
   id: string;
 };
+type SignupInfo = {
+  username: string;
+  email: string;
+};
 export function createJwt(user: User) {
   const jwtSecret = process.env.JWT_SECRET;
   if (jwtSecret) {
@@ -11,6 +15,26 @@ export function createJwt(user: User) {
     return token;
   } else {
     console.log("JWT secret not found");
+    throw new Error();
+  }
+}
+export function createSignupToken(info: SignupInfo) {
+  const signUpSecret = process.env.SIGNUP_SECRET;
+  if (signUpSecret) {
+    const token = jwt.sign(info, signUpSecret, { expiresIn: "1h" });
+    return token;
+  } else {
+    console.log("Signup Secret not found");
+    throw new Error();
+  }
+}
+
+export function verifySignupToken(token: string) {
+  const signUpSecret = process.env.SIGNUP_SECRET;
+  if (signUpSecret) {
+    return jwt.verify(token, signUpSecret) as SignupInfo;
+  } else {
+    console.log("Signup Secret not found");
     throw new Error();
   }
 }

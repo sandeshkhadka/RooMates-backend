@@ -1,5 +1,12 @@
 import { NextFunction, Request, Response } from "express";
-import { comparePassword, createJwt, hashPassword } from "../modules/auth";
+import { sendVerificationMail } from "../services/EmailServices";
+import {
+  comparePassword,
+  createJwt,
+  createSignupToken,
+  hashPassword,
+  verifySignupToken,
+} from "../modules/auth";
 import CustomError from "../modules/errors";
 import prisma from "../db";
 
@@ -41,24 +48,78 @@ export async function signin(req: Request, res: Response, next: NextFunction) {
     }
   }
 }
-
-export async function signup(req: Request, res: Response, next: NextFunction) {
+export async function requestSignup(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) {
   const username: string = req.body.username;
-  const password: string = req.body.password;
   const email: string = req.body.email;
 
   try {
+    const users = await prisma.user.findMany({
+      where: {
+        OR: [
+          {
+            username: username,
+          },
+          {
+            email: email,
+          },
+        ],
+      },
+    });
+    if (users.length) {
+      console.log(users);
+      let emailFlag = false,
+        usernameFlag = false;
+
+      for (const user of users) {
+        if (user.username == username) {
+          usernameFlag = true;
+          break;
+        } else if (user.email == email) {
+          emailFlag = true;
+          break;
+        }
+      }
+
+      if (usernameFlag) {
+        throw new CustomError("USERNAME ERROR", 400);
+      } else if (emailFlag) {
+        throw new CustomError("EMAIL ERROR", 400);
+      } else {
+        throw new CustomError("Could not signup", 500);
+      }
+    }
+    const token = createSignupToken({ username, email });
+    sendVerificationMail(token);
+    res
+      .status(200)
+      .send(
+        JSON.stringify({ message: "Check your email for verification link." }),
+      );
+  } catch (e) {
+    next(e);
+  }
+}
+export async function signup(req: Request, res: Response, next: NextFunction) {
+  const password: string = req.body.password;
+  const signupToken: string = req.body.token;
+
+  try {
+    const info = verifySignupToken(signupToken);
     const hashedPassword = await hashPassword(password);
 
     const user = await prisma.user.create({
       data: {
-        username: username,
+        username: info.username,
         password: hashedPassword,
-        email: email,
+        email: info.email,
       },
     });
 
-    const token = createJwt({
+    const jwt_token = createJwt({
       username: user.username,
       id: user.id,
     });
@@ -68,13 +129,13 @@ export async function signup(req: Request, res: Response, next: NextFunction) {
       username: user.username,
       email: user.email,
       id: user.id,
-      token: token,
+      token: jwt_token,
     });
   } catch (err) {
     if (err instanceof CustomError) {
       next(err);
     } else {
-      next(new CustomError("Could not signup", 500));
+      next(new CustomError("EXPIRED", 400));
     }
   }
 }
