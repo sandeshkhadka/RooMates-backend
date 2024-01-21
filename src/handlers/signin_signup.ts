@@ -93,7 +93,7 @@ export async function requestSignup(
       }
     }
     const token = createSignupToken({ username, email });
-    sendVerificationMail(token);
+    sendVerificationMail(token, email);
     res
       .status(200)
       .send(
