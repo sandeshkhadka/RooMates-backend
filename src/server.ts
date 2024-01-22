@@ -1,13 +1,13 @@
 import express from "express";
-import router from "./router";
+import router from "./router.js";
 import cors from "cors";
 import {
   authMiddleware,
   signInMiddleware,
   requestSignUpMiddleware,
   signUpMiddleware,
-} from "./modules/middlewares";
-import { signin, signup, requestSignup } from "./handlers/signin_signup";
+} from "./modules/middlewares.js";
+import { signin, signup, requestSignup } from "./handlers/signin_signup.js";
 import { body } from "express-validator";
 import morgan from "morgan";
 
@@ -19,7 +19,7 @@ app.use(express.urlencoded({ extended: true }));
 
 app.post(
   "/signup",
-  body(["password", "token"]).exists(),
+  // body(["password", "token", "profile"]).exists(),
   signUpMiddleware,
   signup,
 );

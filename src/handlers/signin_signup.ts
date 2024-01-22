@@ -1,14 +1,18 @@
 import { NextFunction, Request, Response } from "express";
-import { sendVerificationMail } from "../services/EmailServices";
+import formidable from "formidable";
+import fs from "fs/promises";
+import { fileURLToPath } from "url";
+import { dirname } from "path";
+import { sendVerificationMail } from "../services/EmailServices.js";
 import {
   comparePassword,
   createJwt,
   createSignupToken,
   hashPassword,
   verifySignupToken,
-} from "../modules/auth";
-import CustomError from "../modules/errors";
-import prisma from "../db";
+} from "../modules/auth.js";
+import CustomError from "../modules/errors.js";
+import prisma from "../db.js";
 
 export async function signin(req: Request, res: Response, next: NextFunction) {
   const username: string = req.body.username;
@@ -104,32 +108,47 @@ export async function requestSignup(
   }
 }
 export async function signup(req: Request, res: Response, next: NextFunction) {
-  const password: string = req.body.password;
-  const signupToken: string = req.body.token;
-
+  const form = formidable({});
   try {
-    const info = verifySignupToken(signupToken);
-    const hashedPassword = await hashPassword(password);
+    form.parse(req, async (err, fields, files) => {
+      if (err) {
+        throw new Error("form parse error");
+      }
+      if (!(fields.password && fields.token && files.profile)) {
+        throw new Error("insufficinet fileds");
+      }
+      const [password] = fields.password;
+      const [signupToken] = fields.token;
+      const [image] = files.profile;
 
-    const user = await prisma.user.create({
-      data: {
-        username: info.username,
-        password: hashedPassword,
-        email: info.email,
-      },
-    });
+      const info = verifySignupToken(signupToken);
+      const hashedPassword = await hashPassword(password);
 
-    const jwt_token = createJwt({
-      username: user.username,
-      id: user.id,
-    });
+      const user = await prisma.user.create({
+        data: {
+          username: info.username,
+          password: hashedPassword,
+          email: info.email,
+        },
+      });
 
-    res.status(200);
-    res.json({
-      username: user.username,
-      email: user.email,
-      id: user.id,
-      token: jwt_token,
+      const jwt_token = createJwt({
+        username: user.username,
+        id: user.id,
+      });
+      const pwd = dirname(fileURLToPath(import.meta.url));
+      const spwd = pwd.split("/");
+      spwd.splice(spwd.length - 2);
+      const path = `${spwd.join("/")}/uploads/profile_pic/${user.id}.jpeg`;
+      fs.writeFile(path, await fs.readFile(image.filepath)).then(() => {
+        res.status(200);
+        res.json({
+          username: user.username,
+          email: user.email,
+          id: user.id,
+          token: jwt_token,
+        });
+      });
     });
   } catch (err) {
     if (err instanceof CustomError) {

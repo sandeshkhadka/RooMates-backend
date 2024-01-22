@@ -4,10 +4,13 @@
   },
   "files": ["src/index.ts", "src/index.d.ts", "src/global.d.ts"],
   "compilerOptions": {
+    "esModuleInterop": true,
     "sourceMap": true,
     "outDir": "dist",
     "strict": true,
-    "lib": ["esnext"],
-    "esModuleInterop": true
+    "module": "nodenext",
+    // "target": "esnext",
+    "moduleResolution": "nodenext",
+    "lib": ["esnext"]
   }
 }

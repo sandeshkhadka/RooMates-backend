@@ -6,11 +6,11 @@ import {
   getTaskById,
   getTasks,
   updateTask,
-} from "./handlers/task";
+} from "./handlers/task.js";
 import {
   contributionMiddleware,
   createTaskMiddleware,
-} from "./modules/middlewares";
+} from "./modules/middlewares.js";
 import {
   approveContribution,
   createContribution,
@@ -18,13 +18,13 @@ import {
   getContributionById,
   getContributions,
   updateContibutions,
-} from "./handlers/contribution";
-import { getAllUsers, rehydrate } from "./handlers/users";
+} from "./handlers/contribution.js";
+import { getAllUsers, rehydrate } from "./handlers/users.js";
 import {
   getContributionDistribution,
   getPendingTasks,
-} from "./handlers/dashboard";
-import { errHandler } from "./modules/errors";
+} from "./handlers/dashboard.js";
+import { errHandler } from "./modules/errors.js";
 const ContributionTypes = [
   "vegetables",
   "water",

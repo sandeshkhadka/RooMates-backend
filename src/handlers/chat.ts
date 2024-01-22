@@ -1,4 +1,4 @@
-import prisma from "../db";
+import prisma from "../db.js";
 
 export async function createMessage(msg: ChatMessagePayload) {
   const message = await prisma.chatMessages.create({

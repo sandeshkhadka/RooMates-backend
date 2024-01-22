@@ -1,8 +1,9 @@
 import { NextFunction, Request, Response } from "express";
-import { verifyJwt } from "./auth";
+import { verifyJwt } from "./auth.js";
 import { validationResult } from "express-validator";
 import { Socket } from "socket.io";
-import { ExtendedError } from "socket.io/dist/namespace";
+// import { ExtendedError } from "socket.io/dist/namespace.ts";
+
 function rejectRequest(res: Response, status: number, message: string) {
   res.status(status);
   res.json({ message });
@@ -100,10 +101,7 @@ export function authMiddleware(
     rejectRequest(res, 401, "Invalid jwt");
   }
 }
-export function socketAuth(
-  socket: Socket,
-  next: (err?: ExtendedError) => void,
-) {
+export function socketAuth(socket: Socket, next: (err?: Error) => void) {
   const bearer = socket.handshake.auth.token;
   if (!bearer) {
     return next(new Error("Not authorized"));

@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from "express";
-import prisma from "../db";
-import CustomError from "../modules/errors";
+import prisma from "../db.js";
+import CustomError from "../modules/errors.js";
 
 export async function createTask(
   req: Request,

@@ -1,12 +1,12 @@
-import app from "./server";
+import app from "./server.js";
 import { Server } from "socket.io";
 import { createServer } from "http";
-import { socketAuth } from "./modules/middlewares";
+import { socketAuth } from "./modules/middlewares.js";
 import {
   createMessage,
   getRecentMessages,
   deleteMessage,
-} from "./handlers/chat";
+} from "./handlers/chat.js";
 // export type ChatMessageType = {
 //   id: string;
 //   message: string;
