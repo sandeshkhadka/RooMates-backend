@@ -5,7 +5,7 @@ import {
   authMiddleware,
   signInMiddleware,
   requestSignUpMiddleware,
-  signUpMiddleware,
+  // signUpMiddleware,
 } from "./modules/middlewares.js";
 import { signin, signup, requestSignup } from "./handlers/signin_signup.js";
 import { body } from "express-validator";
@@ -20,7 +20,7 @@ app.use(express.urlencoded({ extended: true }));
 app.post(
   "/signup",
   // body(["password", "token", "profile"]).exists(),
-  signUpMiddleware,
+  // signUpMiddleware,
   signup,
 );
 app.post(

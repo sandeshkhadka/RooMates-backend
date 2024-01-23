@@ -60,7 +60,7 @@ export function signUpMiddleware(
   const errors = validationResult(req);
 
   if (!errors.isEmpty()) {
-    return rejectRequest(res, 400, "password and token fields cannot be empty");
+    return res.status(400).send("Missing password, token or profile_picture");
   }
 
   next();

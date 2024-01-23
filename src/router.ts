@@ -24,6 +24,7 @@ import {
   getContributionDistribution,
   getPendingTasks,
 } from "./handlers/dashboard.js";
+import { getProfilePicture } from "./handlers/profile_info.js";
 import { errHandler } from "./modules/errors.js";
 const ContributionTypes = [
   "vegetables",
@@ -38,13 +39,14 @@ const router = Router();
 router.use(errHandler);
 router.get("/task", getTasks);
 router.get("/contribution", getContributions);
-
 router.get("/users", getAllUsers);
 router.get("/rehydrate", rehydrate);
 router.get("/task/:id", getTaskById);
 router.get("/contribution/id/:id", getContributionById);
 router.get("/dashboard/contribution/distribution", getContributionDistribution);
 router.get("/dashboard/task/pending", getPendingTasks);
+
+router.get("/profile_picture/id/:id", getProfilePicture);
 
 router.post(
   "/task",

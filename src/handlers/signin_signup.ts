@@ -17,7 +17,6 @@ import prisma from "../db.js";
 export async function signin(req: Request, res: Response, next: NextFunction) {
   const username: string = req.body.username;
   const password: string = req.body.password;
-  // console.log(username, password);
   try {
     const user = await prisma.user.findUnique({
       where: {
@@ -29,6 +28,7 @@ export async function signin(req: Request, res: Response, next: NextFunction) {
     }
     const hashedPassword = user.password;
     const authPassed = await comparePassword(password, hashedPassword);
+
     if (!authPassed) {
       throw new CustomError("Incorrect username or password", 401);
     }
@@ -74,7 +74,6 @@ export async function requestSignup(
       },
     });
     if (users.length) {
-      console.log(users);
       let emailFlag = false,
         usernameFlag = false;
 
@@ -109,8 +108,8 @@ export async function requestSignup(
 }
 export async function signup(req: Request, res: Response, next: NextFunction) {
   const form = formidable({});
-  try {
-    form.parse(req, async (err, fields, files) => {
+  form.parse(req, async (err, fields, files) => {
+    try {
       if (err) {
         throw new Error("form parse error");
       }
@@ -149,12 +148,12 @@ export async function signup(req: Request, res: Response, next: NextFunction) {
           token: jwt_token,
         });
       });
-    });
-  } catch (err) {
-    if (err instanceof CustomError) {
-      next(err);
-    } else {
-      next(new CustomError("EXPIRED", 400));
+    } catch (err) {
+      if (err instanceof CustomError) {
+        next(err);
+      } else {
+        next(new CustomError("EXPIRED", 400));
+      }
     }
-  }
+  });
 }
