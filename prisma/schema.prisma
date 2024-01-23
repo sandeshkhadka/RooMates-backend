@@ -29,7 +29,7 @@ model RoutineTask {
   name        String
   schedule    DateTime @default(now())
   belongsToId String
-  belongsTo   User     @relation(fields: [belongsToId], references: [id])
+  belongsTo   User     @relation(fields: [belongsToId], references: [id],onDelete: Cascade)
   status        TaskStatus @default(Pending)
 }
 
@@ -39,7 +39,7 @@ model Contribution {
   type        String
   amount      Int
   belongsToId String
-  belongsTo   User   @relation(fields: [belongsToId], references: [id])
+  belongsTo   User   @relation(fields: [belongsToId], references: [id], onDelete: Cascade) 
   createdAt DateTime @default(now())
   approvedBy String[]
   passed Boolean @default(false)
