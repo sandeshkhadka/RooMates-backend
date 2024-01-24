@@ -139,7 +139,7 @@ export async function signup(req: Request, res: Response, next: NextFunction) {
       const spwd = pwd.split("/");
       spwd.splice(spwd.length - 2);
       const path = `${spwd.join("/")}/uploads/profile_pic/${user.id}.jpeg`;
-      fs.writeFile(path, await fs.readFile(image.filepath)).then(() => {
+      await fs.writeFile(path, await fs.readFile(image.filepath))
         res.status(200);
         res.json({
           username: user.username,
@@ -147,7 +147,6 @@ export async function signup(req: Request, res: Response, next: NextFunction) {
           id: user.id,
           token: jwt_token,
         });
-      });
     } catch (err) {
       if (err instanceof CustomError) {
         next(err);

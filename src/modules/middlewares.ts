@@ -9,19 +9,7 @@ function rejectRequest(res: Response, status: number, message: string) {
   res.json({ message });
 }
 
-export function contributionMiddleware(
-  req: Request,
-  res: Response,
-  next: NextFunction,
-) {
-  const errors = validationResult(req);
-
-  if (!errors.isEmpty()) {
-    return rejectRequest(res, 400, "Insufficient data sent");
-  }
-  next();
-}
-export function createTaskMiddleware(
+export function assertAllFieldsPresent(
   req: Request,
   res: Response,
   next: NextFunction,

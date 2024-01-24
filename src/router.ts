@@ -7,10 +7,7 @@ import {
   getTasks,
   updateTask,
 } from "./handlers/task.js";
-import {
-  contributionMiddleware,
-  createTaskMiddleware,
-} from "./modules/middlewares.js";
+import { assertAllFieldsPresent } from "./modules/middlewares.js";
 import {
   approveContribution,
   createContribution,
@@ -24,7 +21,11 @@ import {
   getContributionDistribution,
   getPendingTasks,
 } from "./handlers/dashboard.js";
-import { getProfilePicture } from "./handlers/profile_info.js";
+import {
+  changeProfilePicture,
+  changeUsername,
+  getProfilePicture,
+} from "./handlers/profile_info.js";
 import { errHandler } from "./modules/errors.js";
 const ContributionTypes = [
   "vegetables",
@@ -52,7 +53,7 @@ router.post(
   "/task",
   body("name").exists().notEmpty(),
   body("assignToId").exists().notEmpty(),
-  createTaskMiddleware,
+  assertAllFieldsPresent,
   createTask,
 );
 router.post(
@@ -60,7 +61,7 @@ router.post(
   body(["name", "type", "amount"]).exists(),
   body("type").isIn(ContributionTypes),
   body("amount").isNumeric(),
-  contributionMiddleware,
+  assertAllFieldsPresent,
   createContribution,
 );
 router.post("/contribution/approve/:id", approveContribution);
@@ -68,15 +69,22 @@ router.put(
   "/task/:id",
   body("name").notEmpty(),
   body("status").exists().isIn(["Pending", "Completed", "Missed"]),
-  createTaskMiddleware,
+  assertAllFieldsPresent,
   updateTask,
 );
+router.put(
+  "/settings/username",
+  body("newUsername").exists(),
+  assertAllFieldsPresent,
+  changeUsername,
+);
+router.put("/settings/profile_picture", changeProfilePicture);
 router.put(
   "/contribution/:id",
   body(["name", "type", "amount"]).exists(),
   body("type").isIn(ContributionTypes),
   body("amount").isNumeric(),
-  contributionMiddleware,
+  assertAllFieldsPresent,
   updateContibutions,
 );
 router.delete("/contribution/:id", deleteContribuion);
