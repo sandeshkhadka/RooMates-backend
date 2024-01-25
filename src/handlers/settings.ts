@@ -6,6 +6,15 @@ import CustomError from "../modules/errors.js";
 import prisma from "../db.js";
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library.js";
 import formidable from "formidable";
+import {
+  comparePassword,
+  createTemporaryToken,
+  hashPassword,
+  verifyTemporaryToken,
+} from "../modules/auth.js";
+import jwtPkg from "jsonwebtoken";
+const { JsonWebTokenError } = jwtPkg;
+import { sendPasswordResetMail } from "../services/EmailServices.js";
 export async function getProfilePicture(req: Request, res: Response) {
   const id = req.params.id;
   const pwd = dirname(fileURLToPath(import.meta.url));
@@ -88,4 +97,104 @@ export async function changeProfilePicture(
       }
     }
   });
+}
+export async function changePassword(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) {
+  const oldPasword = req.body.oldPassword;
+  const newPassword = req.body.newPassword;
+  const id = req.user!.id;
+  try {
+    const user = await prisma.user.findUnique({
+      where: {
+        id: id,
+      },
+    });
+    if (!user) {
+      throw new CustomError("no such user", 404);
+    }
+    if (!(await comparePassword(oldPasword, user.password))) {
+      throw new CustomError("wrong password", 401);
+    }
+    const hashedPassword = await hashPassword(newPassword);
+    await prisma.user.update({
+      where: {
+        id: id,
+      },
+      data: {
+        password: hashedPassword,
+      },
+    });
+    res.status(200).send({
+      message: "Password change successfull",
+    });
+  } catch (e) {
+    if (e instanceof CustomError) {
+      next(e);
+    } else {
+      next(new Error("Could not change password"));
+    }
+  }
+}
+export async function resetPassword(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) {
+  const token = req.body.token;
+  const newPassword = req.body.newPassword;
+  try {
+    const user = verifyTemporaryToken(token);
+    const hashedPassword = await hashPassword(newPassword);
+    const updatedUser = await prisma.user.update({
+      where: {
+        username: user.username,
+        email: user.email,
+      },
+      data: {
+        password: hashedPassword,
+      },
+    });
+    if (!updatedUser) {
+      throw new CustomError("no such user", 404);
+    }
+    res.status(200).send({
+      message: "Password reset successfull",
+    });
+  } catch (e) {
+    if (e instanceof JsonWebTokenError) {
+      next(new CustomError("expired", 401));
+    } else {
+      next(e);
+    }
+  }
+}
+export async function requestResetLink(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) {
+  const email: string = req.body.email;
+  try {
+    const user = await prisma.user.findFirst({
+      where: {
+        email: email,
+      },
+    });
+    if (!user) {
+      throw new CustomError("No such user", 404);
+    }
+    const token = createTemporaryToken({
+      username: user.username,
+      email: user.email,
+    });
+    sendPasswordResetMail(token, user.email);
+    res.status(200).send({
+      message: "reset link sent",
+    });
+  } catch (e) {
+    next(e);
+  }
 }

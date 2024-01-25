@@ -5,11 +5,13 @@ import {
   authMiddleware,
   signInMiddleware,
   requestSignUpMiddleware,
+  assertAllFieldsPresent,
   // signUpMiddleware,
 } from "./modules/middlewares.js";
 import { signin, signup, requestSignup } from "./handlers/signin_signup.js";
 import { body } from "express-validator";
 import morgan from "morgan";
+import { requestResetLink, resetPassword } from "./handlers/settings.js";
 
 const app = express();
 app.use(cors());
@@ -28,6 +30,18 @@ app.post(
   body(["username", "email"]).exists(),
   requestSignUpMiddleware,
   requestSignup,
+);
+app.post(
+  "/request_reset",
+  body("email").exists(),
+  assertAllFieldsPresent,
+  requestResetLink,
+);
+app.post(
+  "/reset_password",
+  body(["token", "newPassword"]).exists(),
+  assertAllFieldsPresent,
+  resetPassword,
 );
 app.post(
   "/signin",

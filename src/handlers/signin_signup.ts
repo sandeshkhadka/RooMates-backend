@@ -7,9 +7,9 @@ import { sendVerificationMail } from "../services/EmailServices.js";
 import {
   comparePassword,
   createJwt,
-  createSignupToken,
+  createTemporaryToken,
   hashPassword,
-  verifySignupToken,
+  verifyTemporaryToken,
 } from "../modules/auth.js";
 import CustomError from "../modules/errors.js";
 import prisma from "../db.js";
@@ -95,7 +95,7 @@ export async function requestSignup(
         throw new CustomError("Could not signup", 500);
       }
     }
-    const token = createSignupToken({ username, email });
+    const token = createTemporaryToken({ username, email });
     sendVerificationMail(token, email);
     res
       .status(200)
@@ -120,7 +120,7 @@ export async function signup(req: Request, res: Response, next: NextFunction) {
       const [signupToken] = fields.token;
       const [image] = files.profile;
 
-      const info = verifySignupToken(signupToken);
+      const info = verifyTemporaryToken(signupToken);
       const hashedPassword = await hashPassword(password);
 
       const user = await prisma.user.create({

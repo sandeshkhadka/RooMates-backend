@@ -29,3 +29,15 @@ export async function sendVerificationMail(token: string, email: string) {
   });
   console.log("Message sent: ", info.messageId);
 }
+export async function sendPasswordResetMail(token: string, email: string) {
+  const link = `${baseUrl}/reset_password/?token=${token}`;
+  const info = await transporter.sendMail({
+    from: "Roommate <no-reply@khadkasandesh.com.np>",
+    to: email,
+    subject: "Reset Password",
+    html: `<p>Thank you for using to Room Mates!</p>
+<p>To reset your password, click the link below.</p>
+<a href="${link}">Reset Password</a>`,
+  });
+  console.log("Message sent: ", info.messageId);
+}

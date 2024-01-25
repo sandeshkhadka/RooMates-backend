@@ -4,7 +4,7 @@ export type User = {
   username: string;
   id: string;
 };
-type SignupInfo = {
+type TempTokenInfo = {
   username: string;
   email: string;
 };
@@ -18,23 +18,23 @@ export function createJwt(user: User) {
     throw new Error();
   }
 }
-export function createSignupToken(info: SignupInfo) {
-  const signUpSecret = process.env.SIGNUP_SECRET;
-  if (signUpSecret) {
-    const token = jwt.sign(info, signUpSecret, { expiresIn: "1h" });
+export function createTemporaryToken(info: TempTokenInfo) {
+  const temporarySecret = process.env.TEMP_SECRET;
+  if (temporarySecret) {
+    const token = jwt.sign(info, temporarySecret, { expiresIn: "1h" });
     return token;
   } else {
-    console.log("Signup Secret not found");
+    console.log("Temporary Token Secret not found");
     throw new Error();
   }
 }
 
-export function verifySignupToken(token: string) {
-  const signUpSecret = process.env.SIGNUP_SECRET;
+export function verifyTemporaryToken(token: string) {
+  const signUpSecret = process.env.TEMP_SECRET;
   if (signUpSecret) {
-    return jwt.verify(token, signUpSecret) as SignupInfo;
+    return jwt.verify(token, signUpSecret) as TempTokenInfo;
   } else {
-    console.log("Signup Secret not found");
+    console.log("Temporary Token Secret not found");
     throw new Error();
   }
 }

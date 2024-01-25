@@ -22,10 +22,11 @@ import {
   getPendingTasks,
 } from "./handlers/dashboard.js";
 import {
+  changePassword,
   changeProfilePicture,
   changeUsername,
   getProfilePicture,
-} from "./handlers/profile_info.js";
+} from "./handlers/settings.js";
 import { errHandler } from "./modules/errors.js";
 const ContributionTypes = [
   "vegetables",
@@ -77,6 +78,12 @@ router.put(
   body("newUsername").exists(),
   assertAllFieldsPresent,
   changeUsername,
+);
+router.put(
+  "/settings/password",
+  body(["oldPassword", "newPassword"]).exists(),
+  assertAllFieldsPresent,
+  changePassword,
 );
 router.put("/settings/profile_picture", changeProfilePicture);
 router.put(
