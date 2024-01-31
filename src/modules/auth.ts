@@ -12,7 +12,7 @@ type TempTokenInfo = {
 export function createJwt(user: User) {
   const jwtSecret = process.env.JWT_SECRET;
   if (jwtSecret) {
-    const token = jwt.sign(user, jwtSecret, {expiresIn: "7d"});
+    const token = jwt.sign(user, jwtSecret, { expiresIn: "7d" });
     return token;
   } else {
     console.log("JWT secret not found");
