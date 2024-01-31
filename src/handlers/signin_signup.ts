@@ -35,6 +35,7 @@ export async function signin(req: Request, res: Response, next: NextFunction) {
     const token = createJwt({
       username: user.username,
       id: user.id,
+      email: user.email,
     });
     res.status(200);
     res.json({
@@ -134,19 +135,20 @@ export async function signup(req: Request, res: Response, next: NextFunction) {
       const jwt_token = createJwt({
         username: user.username,
         id: user.id,
+        email: user.email
       });
       const pwd = dirname(fileURLToPath(import.meta.url));
       const spwd = pwd.split("/");
       spwd.splice(spwd.length - 2);
       const path = `${spwd.join("/")}/uploads/profile_pic/${user.id}.jpeg`;
-      await fs.writeFile(path, await fs.readFile(image.filepath))
-        res.status(200);
-        res.json({
-          username: user.username,
-          email: user.email,
-          id: user.id,
-          token: jwt_token,
-        });
+      await fs.writeFile(path, await fs.readFile(image.filepath));
+      res.status(200);
+      res.json({
+        username: user.username,
+        email: user.email,
+        id: user.id,
+        token: jwt_token,
+      });
     } catch (err) {
       if (err instanceof CustomError) {
         next(err);

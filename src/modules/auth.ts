@@ -3,6 +3,7 @@ import bcrypt from "bcrypt";
 export type User = {
   username: string;
   id: string;
+  email: string;
 };
 type TempTokenInfo = {
   username: string;
@@ -11,7 +12,7 @@ type TempTokenInfo = {
 export function createJwt(user: User) {
   const jwtSecret = process.env.JWT_SECRET;
   if (jwtSecret) {
-    const token = jwt.sign(user, jwtSecret);
+    const token = jwt.sign(user, jwtSecret, {expiresIn: "7d"});
     return token;
   } else {
     console.log("JWT secret not found");
