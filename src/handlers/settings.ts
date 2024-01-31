@@ -8,6 +8,7 @@ import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library.js
 import formidable from "formidable";
 import {
   comparePassword,
+  createJwt,
   createTemporaryToken,
   hashPassword,
   verifyTemporaryToken,
@@ -48,10 +49,16 @@ export async function changeUsername(
         username: newUsername,
       },
     });
+    const token = createJwt({
+      username: user.username,
+      email: user.email,
+      id: user.id,
+    });
     res.status(200).send({
       userid: user.id,
       old_username: username,
       updated_username: user.username,
+      token: token,
     });
   } catch (e) {
     if (e instanceof CustomError) {
