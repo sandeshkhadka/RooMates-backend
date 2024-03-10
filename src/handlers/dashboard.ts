@@ -8,7 +8,6 @@ type ContributionDistribution = {
     amount: number;
   }[];
 };
-
 export async function getContributionDistribution(
   req: Request,
   res: Response,
@@ -46,20 +45,25 @@ export async function getPendingTasks(
 ) {
   try {
     const groupedtasks = await prisma.routineTask.groupBy({
-      by: ["belongsToId"],
+      by: ["belongsToId", "status"],
       _count: {
         id: true,
       },
-      where: {
-        status: "Pending",
-      },
+      // where: {
+      //   status: "Pending",
+      // },
     });
-    const tasks = groupedtasks.map((item) => ({
-      userId: item.belongsToId,
-      amount: item._count.id,
-    }));
+    const pending = groupedtasks
+      .filter((item) => item.status == "Pending")
+      .map((item) => ({ userId: item.belongsToId, amount: item._count.id }));
+    const completed = groupedtasks
+      .filter((item) => item.status == "Completed")
+      .map((item) => ({ userId: item.belongsToId, amount: item._count.id }));
+    const missed = groupedtasks
+      .filter((item) => item.status == "Missed")
+      .map((item) => ({ userId: item.belongsToId, amount: item._count.id }));
     res.status(200);
-    res.json({ tasks });
+    res.json({ pending, completed, missed });
   } catch (err) {
     if (err instanceof CustomError) {
       next(err);
