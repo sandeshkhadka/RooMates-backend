@@ -12,6 +12,7 @@ import {
   approveContribution,
   createContribution,
   deleteContribuion,
+  getContributionByDate,
   getContributionById,
   getContributions,
   updateContibutions,
@@ -39,8 +40,13 @@ const ContributionTypes = [
 ];
 const router = Router();
 router.use(errHandler);
-router.get("/task", getTasks);
-router.get("/contribution", getContributions);
+router.post(
+  "/task",
+  body("page").exists().notEmpty().isNumeric(),
+  assertAllFieldsPresent,
+  getTasks,
+);
+
 router.get("/users", getAllUsers);
 router.get("/rehydrate", rehydrate);
 router.get("/task/:id", getTaskById);
@@ -49,16 +55,28 @@ router.get("/dashboard/contribution/distribution", getContributionDistribution);
 router.get("/dashboard/task/pending", getPendingTasks);
 
 router.get("/profile_picture/id/:id", getProfilePicture);
+router.post(
+  "/bydate/contributions",
+  body("startDate").exists().notEmpty().isDate(),
+  body("endDate").exists().notEmpty().isDate(),
+  getContributionByDate,
+);
 
 router.post(
-  "/task",
+  "/create/task",
   body("name").exists().notEmpty(),
   body("assignToId").exists().notEmpty(),
   assertAllFieldsPresent,
   createTask,
 );
 router.post(
-  "/contribution",
+  "/contributions",
+  body("page").exists().notEmpty().isNumeric(),
+  assertAllFieldsPresent,
+  getContributions,
+);
+router.post(
+  "/create/contribution",
   body(["name", "type", "amount"]).exists(),
   body("type").isIn(ContributionTypes),
   body("amount").isNumeric(),

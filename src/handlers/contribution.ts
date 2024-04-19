@@ -1,12 +1,12 @@
 import { NextFunction, Request, Response } from "express";
 import prisma from "../db.js";
 import CustomError from "../modules/errors.js";
-
 export async function approveContribution(
   req: Request,
   res: Response,
   next: NextFunction,
 ) {
+  // const userId = req.user!.id;
   const username: string = req.user!.username;
   const contributionId: string = req.params.id;
 
@@ -90,11 +90,15 @@ export async function getContributions(
   res: Response,
   next: NextFunction,
 ) {
+  const page = req.body.page;
+  const offset = (parseInt(page) - 1) * PAGE_SIZE;
   try {
     const contributions = await prisma.contribution.findMany({
       orderBy: {
         createdAt: "desc",
       },
+      skip: offset,
+      take: PAGE_SIZE,
     });
 
     res.status(200);
@@ -129,7 +133,38 @@ export async function getContributionById(
     }
   }
 }
+export async function getContributionByDate(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) {
+  const startDate = new Date(req.body.startDate).toISOString();
+  const endDate = new Date(req.body.endDate).toISOString();
+  try {
+    const contributions = await prisma.contribution.findMany({
+      where: {
+        createdAt: {
+          gte: startDate,
+          lte: endDate,
+        },
+      },
+    });
 
+    res.status(200);
+    res.json({ contributions });
+  } catch (err) {
+    if (err instanceof CustomError) {
+      next(err);
+    } else {
+      next(
+        new CustomError(
+          `Could not get contribution with within ${startDate} and ${endDate}`,
+          500,
+        ),
+      );
+    }
+  }
+}
 export async function updateContibutions(
   req: Request,
   res: Response,

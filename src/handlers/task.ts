@@ -41,8 +41,13 @@ export async function getTasks(
   res: Response,
   next: NextFunction,
 ) {
+  const page = req.body.page;
+  const offset = (parseInt(page) - 1) * PAGE_SIZE;
   try {
-    const tasks = await prisma.routineTask.findMany();
+    const tasks = await prisma.routineTask.findMany({
+      take: PAGE_SIZE,
+      skip: offset,
+    });
 
     res.status(200);
     res.json({ tasks });
