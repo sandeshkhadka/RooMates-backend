@@ -3,20 +3,37 @@ import prisma from "../db.js";
 import CustomError from "../modules/errors.js";
 
 type ContributionLeaderboard = {
-  leaderboard: {
-    rank: number;
+  rank: number;
+  userId: string;
+  amount: number;
+}[];
+type ExpenseLeaderboard = {
+  rank: number;
+  category: string;
+  amount: {
+    amount: number | null;
+  };
+}[];
+type TaskLeaderboard = {
+  pending: {
+    userId: string;
+    amount: number;
+  }[];
+  completed: {
+    userId: string;
+    amount: number;
+  }[];
+  missed: {
     userId: string;
     amount: number;
   }[];
 };
+
 export async function contributionLeaderboard(
   _req: Request,
   res: Response,
   next: NextFunction,
 ) {
-  const leaderboard: ContributionLeaderboard = {
-    leaderboard: [],
-  };
   try {
     const grouped = await prisma.contribution.groupBy({
       by: ["belongsToId"],
@@ -36,7 +53,7 @@ export async function contributionLeaderboard(
       userId: item.belongsToId,
       amount: item._sum.amount || 0,
     }));
-    leaderboard.leaderboard = contribution;
+    const leaderboard: ContributionLeaderboard = contribution;
 
     res.json(leaderboard);
   } catch (err) {
@@ -72,7 +89,8 @@ export async function taskleaderboard(
       .filter((item) => item.status == "Missed")
       .map((item) => ({ userId: item.belongsToId, amount: item._count.id }));
     res.status(200);
-    res.json({ pending, completed, missed });
+    const leaderboard: TaskLeaderboard = { pending, completed, missed };
+    res.json(leaderboard);
   } catch (err) {
     if (err instanceof CustomError) {
       next(err);
@@ -99,14 +117,15 @@ export async function expenseLeaderboard(
         },
       },
     });
-    const leaderboard = grouped.map((item, index) => {
+    const leaderboard: ExpenseLeaderboard = grouped.map((item, index) => {
       return {
         rank: index + 1,
         category: item.type,
         amount: item._sum,
       };
     });
-    res.send(leaderboard);
+    res.status(200);
+    res.json(leaderboard);
   } catch (error) {
     if (error instanceof CustomError) {
       next(error);
