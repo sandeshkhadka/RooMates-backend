@@ -2,19 +2,20 @@ import { NextFunction, Request, Response } from "express";
 import prisma from "../db.js";
 import CustomError from "../modules/errors.js";
 
-type ContributionDistribution = {
-  byUser: {
+type ContributionLeaderboard = {
+  leaderboard: {
+    rank: number;
     userId: string;
     amount: number;
   }[];
 };
-export async function getContributionDistribution(
-  req: Request,
+export async function contributionLeaderboard(
+  _req: Request,
   res: Response,
   next: NextFunction,
 ) {
-  const distribution: ContributionDistribution = {
-    byUser: [],
+  const leaderboard: ContributionLeaderboard = {
+    leaderboard: [],
   };
   try {
     const grouped = await prisma.contribution.groupBy({
@@ -22,14 +23,22 @@ export async function getContributionDistribution(
       _sum: {
         amount: true,
       },
+      orderBy: [
+        {
+          _sum: {
+            amount: "desc",
+          },
+        },
+      ],
     });
-    const contribution = grouped.map((item) => ({
+    const contribution = grouped.map((item, index) => ({
+      rank: index + 1,
       userId: item.belongsToId,
       amount: item._sum.amount || 0,
     }));
-    distribution.byUser = contribution;
+    leaderboard.leaderboard = contribution;
 
-    res.json(distribution);
+    res.json(leaderboard);
   } catch (err) {
     if (err instanceof CustomError) {
       next(err);
@@ -38,8 +47,8 @@ export async function getContributionDistribution(
     }
   }
 }
-export async function getPendingTasks(
-  req: Request,
+export async function taskleaderboard(
+  _req: Request,
   res: Response,
   next: NextFunction,
 ) {
@@ -69,6 +78,40 @@ export async function getPendingTasks(
       next(err);
     } else {
       next(new CustomError("Could not get pending task", 500));
+    }
+  }
+}
+
+export async function expenseLeaderboard(
+  _req: Request,
+  res: Response,
+  next: NextFunction,
+) {
+  try {
+    const grouped = await prisma.contribution.groupBy({
+      by: ["type"],
+      _sum: {
+        amount: true,
+      },
+      orderBy: {
+        _sum: {
+          amount: "desc",
+        },
+      },
+    });
+    const leaderboard = grouped.map((item, index) => {
+      return {
+        rank: index + 1,
+        category: item.type,
+        amount: item._sum,
+      };
+    });
+    res.send(leaderboard);
+  } catch (error) {
+    if (error instanceof CustomError) {
+      next(error);
+    } else {
+      next(new CustomError("Couldnot get expense leaderboard", 500));
     }
   }
 }

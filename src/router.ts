@@ -19,9 +19,10 @@ import {
 } from "./handlers/contribution.js";
 import { getAllUsers, rehydrate } from "./handlers/users.js";
 import {
-  getContributionDistribution,
-  getPendingTasks,
-} from "./handlers/dashboard.js";
+  contributionLeaderboard,
+  expenseLeaderboard,
+  taskleaderboard,
+} from "./handlers/leaderboard.js";
 import {
   changePassword,
   changeProfilePicture,
@@ -51,8 +52,11 @@ router.get("/users", getAllUsers);
 router.get("/rehydrate", rehydrate);
 router.get("/task/:id", getTaskById);
 router.get("/contribution/id/:id", getContributionById);
-router.get("/dashboard/contribution/distribution", getContributionDistribution);
-router.get("/dashboard/task/pending", getPendingTasks);
+
+//leaderboard
+router.get("/leaderboard/contribution", contributionLeaderboard);
+router.get("/leaderboard/task", taskleaderboard);
+router.get("/leaderboard/expense", expenseLeaderboard);
 
 router.get("/profile_picture/id/:id", getProfilePicture);
 router.post(
