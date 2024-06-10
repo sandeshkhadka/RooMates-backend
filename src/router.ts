@@ -20,6 +20,7 @@ import {
 import { getAllUsers, rehydrate } from "./handlers/users.js";
 import {
   contributionLeaderboard,
+  expenseTimeline as expenseTimeline,
   expenseLeaderboard,
   taskleaderboard,
 } from "./handlers/leaderboard.js";
@@ -57,6 +58,7 @@ router.get("/contribution/id/:id", getContributionById);
 router.get("/leaderboard/contribution", contributionLeaderboard);
 router.get("/leaderboard/task", taskleaderboard);
 router.get("/leaderboard/expense", expenseLeaderboard);
+router.get("/leaderboard/expenseTimeline", expenseTimeline);
 
 router.get("/profile_picture/id/:id", getProfilePicture);
 router.post(

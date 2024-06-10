@@ -64,6 +64,21 @@ export async function contributionLeaderboard(
     }
   }
 }
+export async function expenseTimeline(req: Request, res: Response, next: NextFunction) {
+  try {
+    const data = await prisma.$queryRaw`SELECT "Contribution"."createdAt"::date, SUM("Contribution".amount) FROM "Contribution" GROUP BY 1 ORDER BY 1 ASC;`
+
+    res.status(200)
+    res.json(JSON.parse(JSON.stringify(data, (key, value) => (typeof value == "bigint" ? value.toString() : value))))
+  } catch (e) {
+    if (e instanceof CustomError) {
+      next(e)
+    } else {
+      console.log(e)
+      next(new CustomError("Couldn't get expense chart", 500))
+    }
+  }
+}
 export async function taskleaderboard(
   _req: Request,
   res: Response,
