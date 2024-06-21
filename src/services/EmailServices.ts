@@ -25,7 +25,7 @@ export async function sendVerificationMail(token: string, email: string) {
     subject: "Email Verification",
     html: `<p>Thank you for using to Room Mates!</p>
 <p>Please verify your email address and complete your profile by setting your password. Click the link below.</p>
-<a href="${link}">Verify my email</a>`,
+<a href="${link}">Verify my email</a><br> ${link}`,
   });
   console.log("Message sent: ", info.messageId);
 }
@@ -37,7 +37,7 @@ export async function sendPasswordResetMail(token: string, email: string) {
     subject: "Reset Password",
     html: `<p>Thank you for using to Room Mates!</p>
 <p>To reset your password, click the link below.</p>
-<a href="${link}">Reset Password</a>`,
+<a href="${link}">Reset Password</a> ${link}`,
   });
   console.log("Message sent: ", info.messageId);
 }
