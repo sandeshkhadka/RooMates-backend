@@ -1,5 +1,5 @@
 # RooMates
-Roommates is room sharing and management application
+Backend for [Roommates](https://github.com/sandeshkhadka/RooMates-Frontend) written in Nodejs (Express)
 
 ## Requirements
     - node@18.17.1 
@@ -23,7 +23,7 @@ vim .env
 ```bash
 npm run dev
 ```
-
-### Using Docker
-
 ***Make sure you have your database running before staring the server***
+
+## Docs: Refer to [wiki](https://github.com/sandeshkhadka/RooMates-backend/wiki) for documentation on api and routes
+
