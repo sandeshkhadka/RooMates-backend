@@ -2,15 +2,21 @@
   "ts-node": {
     "files": true
   },
-  "files": ["src/index.ts", "src/index.d.ts", "src/global.d.ts"],
+  "files": [
+    "src/index.ts",
+    "src/index.d.ts",
+    "src/global.d.ts"
+  ],
   "compilerOptions": {
     "esModuleInterop": true,
     "sourceMap": true,
     "outDir": "dist",
     "strict": true,
-    "module": "nodenext",
+    "module": "esnext",
     // "target": "esnext",
     "moduleResolution": "nodenext",
-    "lib": ["esnext"]
+    "lib": [
+      "esnext"
+    ]
   }
 }
