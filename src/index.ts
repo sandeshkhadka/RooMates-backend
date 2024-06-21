@@ -1,5 +1,5 @@
-import app from "./server.js";
 import "dotenv/config";
+import app from "./server.js";
 import io from "./chatServer.js";
 import { errHandler } from "./modules/errors.js";
 export const PORT = Number(process.env.PORT);
