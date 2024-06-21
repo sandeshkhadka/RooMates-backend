@@ -1,5 +1,5 @@
 # RooMates
-Roommates is room sharing and management 
+Roommates is room sharing and management application
 
 ## Requirements
     - node@18.17.1 
